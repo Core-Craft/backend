@@ -9,5 +9,5 @@ class User(TimestampMixin):
     phone_no: str
     aadhar_no: Optional[int]
     user_type: str
-    is_active: bool
+    is_active: bool``
     is_superuser: bool
