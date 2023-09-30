@@ -1,25 +1,30 @@
-from pydantic import EmailStr, constr, validator
-import re
-from typing import Optional
+from app.db.base import DataBase
+from dotenv import load_dotenv
+from typing import List
+import os
 
-from .utils import TimestampMixin
+class User:
+    def __init__(self):        
+        # Load environment variables from .env file
+        load_dotenv()
 
-class User(TimestampMixin):
-    id: int
-    full_name: str
-    email: EmailStr
-    password: str
-    phone_no: str
-    aadhar_no: Optional[int]
-    user_type: str
-    is_active: bool
-    is_superuser: bool
-    
-    
-    # @validator("phone_no")
-    # def check_phoneNumber_format(cls, v):
-    #     # write regex for phone no as per indian standards
-    #     regExs = (r"\(\w{3}\) \w{3}\-\w{4}", r"^\w{3}\-\w{4}$")
-    #     if not re.search(regExs[0], v):
-    #         return ValueError("not match")
-    #     return v
+        self.__db_url = os.environ.get('DB_URL')
+        self.__db_name = os.environ.get('DB_NAME')
+        self.__table_name = os.environ.get('USER_TABLE_NAME')
+        self.__db = DataBase(db_url=self.__db_url)
+        
+
+    def save(self, data: dict):        
+        return  self.__db.upload(db_name=self.__db_name, table_name=self.__table_name, data=data)
+
+    def get(self, filter: dict):
+        return self.__db.query(db_name=self.__db_name, table_name=self.__table_name, filter=filter)
+
+    def get_all(self):
+        return list(self.__db.query(db_name=self.__db_name, table_name=self.__table_name, bulk=True))
+
+    def update(self, data: dict):
+        return self.__db.update(db_name=self.__db_name, table_name=self.__table_name, data=data)
+
+    def delete(self, filter: dict):
+        return self.__db.delete(db_name=self.__db_name, table_name=self.__table_name, filter=filter)
