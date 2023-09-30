@@ -106,22 +106,12 @@ class DataBase:
         """
         self.validate(db_name, table_name, data_opt=True, data=data)
 
-        # time-zone
-        ist = pytz.timezone("Asia/Kolkata")
-
         database = self.mongod[db_name]
         dataset = database[table_name]
 
         if isinstance(data, dict):
-            time_stamp = datetime.now(ist).strftime("%Y-%m-%d || %H:%M:%S:%f")
-            data["_id"] = time_stamp
             response = dataset.insert_one(data)
         else:
-            [
-                x.update({"_id": datetime.now(ist).strftime(
-                    "%Y-%m-%d || %H:%M:%S:%f")})
-                for x in data
-            ]
             response = dataset.insert_many(data)
 
         return response
