@@ -169,10 +169,14 @@ class DataBase:
         database = self.mongod[db_name]
         dataset = database[table_name]
 
+        update = {
+                "$set": data["update"]
+            }
+        
         if bulk:
-            response = dataset.update_many(data)
+            response = dataset.update_many(data["filter"], update)
         else:
-            response = dataset.update_one(data)
+            response = dataset.update_one(data["filter"], update)
 
         return response
 
