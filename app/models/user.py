@@ -17,12 +17,15 @@ class User:
     def save(self, data: dict):        
         return  self.__db.upload(db_name=self.__db_name, table_name=self.__table_name, data=data)
 
-    def get(self, filter: dict):
-        return self.__db.query(db_name=self.__db_name, table_name=self.__table_name, filter=filter)
+    def get(self, user_uuid: int):
+        return self.__db.query(db_name=self.__db_name, table_name=self.__table_name, filter={"user_uuid": user_uuid})
 
     def get_all(self):
         return list(self.__db.query(db_name=self.__db_name, table_name=self.__table_name, bulk=True))
 
+    def filter(self, filter: dict):
+        return list(self.__db.query(db_name=self.__db_name, table_name=self.__table_name, filter=filter, bulk=True))
+    
     def update(self, data: dict):
         return self.__db.update(db_name=self.__db_name, table_name=self.__table_name, data=data)
 
