@@ -1,12 +1,35 @@
-from datetime import datetime
-
 import pymongo
-import pytz
 
 from app.exceptions.custom_exceptions import MissingAttributeError
 
 
 class DataBase:
+    """
+    Provides a MongoDB database interaction utility.
+
+    This class allows you to interact with a MongoDB database using methods for connecting, validating input data, uploading, querying, updating, and deleting data.
+
+    Args:
+        db_url (str, optional): The database connection URL. If provided, the class will establish a connection to the specified MongoDB instance.
+
+    Attributes:
+        database_url (str): The database connection URL.
+        mongod (pymongo.MongoClient): The MongoDB client instance established using the provided URL.
+
+    Methods:
+        - connect(): Establishes a connection to the MongoDB instance.
+        - validate(): Validates input data and raises errors for missing or invalid attributes.
+        - upload(): Inserts data into the specified database and collection.
+        - query(): Retrieves data from the specified database and collection based on provided filters.
+        - update(): Updates data in the specified database and collection based on provided filters.
+        - delete(): Deletes data from the specified database and collection based on provided filters.
+
+    Note:
+        - The class is designed to be used for MongoDB database interactions.
+        - You can connect to a MongoDB instance by providing the `db_url` parameter during initialization.
+        - The provided methods handle data validation and various database operations.
+    """
+
     def __init__(self, db_url=None):
         """_summary_
         initiate mongodb instance
@@ -128,13 +151,14 @@ class DataBase:
         Returns:
             response: response code, data
         """
-        
+
         self.validate(
             db_name,
             table_name,
             filter_opt=True if filter else False,
             filter=filter,
-            bulk=bulk)
+            bulk=bulk,
+        )
 
         database = self.mongod[db_name]
         dataset = database[table_name]
@@ -169,10 +193,8 @@ class DataBase:
         database = self.mongod[db_name]
         dataset = database[table_name]
 
-        update = {
-                "$set": data["update"]
-            }
-        
+        update = {"$set": data["update"]}
+
         if bulk:
             response = dataset.update_many(data["filter"], update)
         else:
