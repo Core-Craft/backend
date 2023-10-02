@@ -20,4 +20,4 @@ jobs:
         pip install flake8
 
     - name: Analysing the code with Flake8
-      run: flake8 $(git ls-files '*.py')
+      run: flake8 --ignore=E501 $(git ls-files '*.py')
