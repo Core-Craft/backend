@@ -15,19 +15,19 @@ class BaseUser(BaseModel):
         full_name (str): The full name of the user, constrained to 50 characters with leading/trailing whitespaces stripped.
         email (EmailStr, optional): The email address of the user, if provided.
         phone_no (str): The phone number of the user.
-        aadhar_no (int, optional): The Aadhar number of the user, if provided.
+        aadhar_no (int, optional): The Aadhar number of the user if provided.
         user_role (str): The role or designation of the user, constrained to 50 characters with leading/trailing whitespaces stripped.
 
     Config:
         from_attributes (bool): Indicates whether attribute values should be populated from the corresponding class attributes when creating an instance. Defaults to True.
     """
 
-    user_uuid: int
-    full_name: constr(strip_whitespace=True, max_length=50)
+    user_uuid: int | None = None
+    full_name: constr(strip_whitespace=True, max_length=50) | None = None
     email: EmailStr | None = None
-    phone_no: str
+    phone_no: str | None = None
     aadhar_no: int | None = None
-    user_role: constr(strip_whitespace=True, max_length=50)
+    user_role: constr(strip_whitespace=True, max_length=50) | None = None
 
     class Config:
         """
@@ -71,14 +71,14 @@ class UserIn(TimestampMixin, BaseUser):
     is_superuser: bool = False
 
     @validator("aadhar_no", pre=True, always=True)
-    def check_aadhar_no(self, value):
+    def check_aadhar_no(cls, value):
         """
         Validate the Aadhar number.
 
         This validator method checks if the provided Aadhar number (if not None) is a valid 12-digit integer.
 
         Args:
-            self: The current instance of the Pydantic model.
+            cls: The Pydantic model class.
             value: The value of the Aadhar number field to be validated.
 
         Returns:
@@ -119,6 +119,16 @@ class UserOut(BaseUser):
         This class does not introduce additional attributes or behavior beyond what is defined in the `BaseUser` class. It serves as a specialized version of `BaseUser` specifically designed for representing user data in response objects.
     """
 
+    class Config:
+        """
+        Configuration options for Pydantic models.
+
+        Attributes:
+            from_attributes (bool): Determines whether attribute values should be populated from class attributes when creating an instance of the model. If True, class attributes with the same name as fields in the model will be used to initialize those fields. Defaults to True, enabling attribute initialization from class attributes.
+        """
+
+        from_attributes = True
+
 
 class UserSearch(BaseUser):
     """
@@ -139,14 +149,45 @@ class UserSearch(BaseUser):
     BaseUser.user_role = None
     BaseUser.phone_no = None
 
+    class Config:
+        """
+        Configuration options for Pydantic models.
 
-# class UserUpdate(BaseUser):
+        Attributes:
+            from_attributes (bool): Determines whether attribute values should be populated from class attributes when creating an instance of the model. If True, class attributes with the same name as fields in the model will be used to initialize those fields. Defaults to True, enabling attribute initialization from class attributes.
+        """
 
-#     filter = UserSearch
-#     data = BaseUser
-
-#     updated_at: datetime = datetime.now(pytz.timezone("Asia/Kolkata")).strftime("%Y-%m-%d || %H:%M:%S:%f")
+        from_attributes = True
 
 
-#     class Config:
-#         from_attributes = True
+class UserUpdate(BaseModel):
+    """
+    Represents a user update model for modifying user data.
+
+    This class includes two fields:
+    - filter: An instance of the UserSearch class that specifies the filter criteria for identifying the user to be updated.
+    - user_data: An instance of the BaseUser class containing updated user data.
+
+    Attributes:
+        filter (UserSearch): An instance of the UserSearch class to specify filter criteria.
+        user_data (BaseUser): An instance of the BaseUser class containing updated user data.
+
+    Note:
+        - Use this class to define the criteria for selecting a user to update and provide the new user data to be applied.
+
+    Configuration Options:
+        - Config.from_attributes (bool): Determines whether attribute values should be populated from class attributes when creating an instance of the model. If True, class attributes with the same name as fields in the model will be used to initialize those fields. Defaults to True, enabling attribute initialization from class attributes.
+    """
+
+    filter: UserSearch
+    user_data: BaseUser
+
+    class Config:
+        """
+        Configuration options for Pydantic models.
+
+        Attributes:
+            from_attributes (bool): Determines whether attribute values should be populated from class attributes when creating an instance of the model. If True, class attributes with the same name as fields in the model will be used to initialize those fields. Defaults to True, enabling attribute initialization from class attributes.
+        """
+
+        from_attributes = True
