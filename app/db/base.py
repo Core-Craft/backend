@@ -193,7 +193,7 @@ class DataBase:
         database = self.mongod[db_name]
         dataset = database[table_name]
 
-        update = {"$set": data["update"]}
+        update = {"$set": data["user_data"]}
 
         if bulk:
             response = dataset.update_many(data["filter"], update)
