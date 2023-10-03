@@ -66,7 +66,7 @@ class User:
         return self.__db.query(
             db_name=self.__db_name,
             table_name=self.__table_name,
-            filter={"user_uuid": user_uuid},
+            filter={"user_uuid": user_uuid}
         )
 
     def get_all(self):
@@ -97,7 +97,7 @@ class User:
                 db_name=self.__db_name,
                 table_name=self.__table_name,
                 filter=filter,
-                bulk=True,
+                bulk=True
             )
         )
 
@@ -115,7 +115,7 @@ class User:
             db_name=self.__db_name, table_name=self.__table_name, data=data
         )
 
-    def delete(self, filter: dict):
+    def delete(self, user_uuid: int):
         """
         Deletes user data based on a filter criteria from the database table.
 
@@ -126,5 +126,7 @@ class User:
             response: The response code from the database operation.
         """
         return self.__db.delete(
-            db_name=self.__db_name, table_name=self.__table_name, filter=filter
+            db_name=self.__db_name,
+            table_name=self.__table_name,
+            filter={"user_uuid": user_uuid}
         )
