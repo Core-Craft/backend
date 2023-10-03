@@ -4,6 +4,7 @@ from fastapi import APIRouter, HTTPException
 
 from app.models.user import User as UserModel
 from app.schemas.user import UserIn, UserOut, UserSearch, UserUpdate
+from .utils import hash_password
 
 user = APIRouter()
 
@@ -117,6 +118,10 @@ async def register_user(user_data: UserIn):
         raise HTTPException(status_code=400, detail=f"Invalid user data: {e}")
 
     try:
+        # saving hashed password in db
+        user_pass = user_dict['password']
+        encypted_pass = hash_password(user_pass)
+        user_dict['password'] = encypted_pass
         response = user_instance.save(data=user_dict)
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to register user: {e}")
