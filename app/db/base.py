@@ -1,4 +1,10 @@
+from datetime import datetime
+
 import pymongo
+<<<<<<< Updated upstream
+=======
+import pytz
+>>>>>>> Stashed changes
 
 from app.exceptions.custom_exceptions import MissingAttributeError
 
@@ -40,6 +46,7 @@ class DataBase:
             self.mongod: mongodb instance
         """
         if not db_url:
+<<<<<<< Updated upstream
             raise MissingAttributeError("db_url required")
         else:
             if not isinstance(db_url, str):
@@ -47,6 +54,13 @@ class DataBase:
                     f"Expected a str for 'db_url' but received a {type(db_url).__name__}."
                 )
 
+=======
+            raise MissingAttributeError("db_url is required")
+        elif not isinstance(db_url, str):
+            raise TypeError(
+                f"Expected a str for 'db_url' but received a {type(db_url).__name__}."
+            )
+>>>>>>> Stashed changes
         self.database_url = db_url
         self.mongod = self.connect()
 
@@ -75,6 +89,7 @@ class DataBase:
         accepts multiple arguments and raise MissingAttributeError & TypeError if missing/invalid
         """
         if not db_name:
+<<<<<<< Updated upstream
             raise MissingAttributeError("db_name required")
         else:
             if not isinstance(db_name, str):
@@ -113,6 +128,41 @@ class DataBase:
                 raise TypeError(
                     f"Expected a bool for 'bulk' but received a {type(bulk).__name__}."
                 )
+=======
+            raise MissingAttributeError("db_name is required")
+        elif not isinstance(db_name, str):
+            raise TypeError(
+                f"Expected a str for 'db_name' but received a {type(db_name).__name__}."
+            )
+
+        if not table_name:
+            raise MissingAttributeError("table_name is required")
+        elif not isinstance(table_name, str):
+            raise TypeError(
+                f"Expected a str for 'table_name' but received a {type(table_name).__name__}."
+            )
+
+        if data_opt:
+            if not data:
+                raise MissingAttributeError("data is required")
+            elif not (isinstance(data, dict) or isinstance(data, list)):
+                raise TypeError(
+                    f"Expected a dict/list for 'data' but received a {type(data).__name__}."
+                )
+
+        if filter_opt:
+            if not filter:
+                raise MissingAttributeError("filter is required")
+            elif not isinstance(filter, dict):
+                raise TypeError(
+                    f"Expected a dict for 'filter' but received a {type(filter).__name__}."
+                )
+
+        if bulk and not isinstance(bulk, bool):
+            raise TypeError(
+                f"Expected a bool for 'bulk' but received a {type(bulk).__name__}."
+            )
+>>>>>>> Stashed changes
 
     def upload(self, db_name=None, table_name=None, data=None):
         """_summary_
@@ -199,6 +249,9 @@ class DataBase:
         database = self.mongod[db_name]
         dataset = database[table_name]
 
+        data.get("user_data")["updated_at"] = datetime.now(
+            pytz.timezone("Asia/Kolkata")
+        ).strftime("%Y-%m-%d || %H:%M:%S:%f")
         update = {"$set": data["user_data"]}
 
         if bulk:
