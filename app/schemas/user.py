@@ -144,11 +144,6 @@ class UserSearch(BaseUser):
         - When creating instances of this class, you can specify values for specific fields to filter user search results based on the provided criteria.
     """
 
-    BaseUser.user_uuid = None
-    BaseUser.full_name = None
-    BaseUser.user_role = None
-    BaseUser.phone_no = None
-
     class Config:
         """
         Configuration options for Pydantic models.
