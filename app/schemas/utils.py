@@ -17,9 +17,9 @@ class TimestampMixin(BaseModel):
         - The timestamps are generated in the 'Asia/Kolkata' timezone.
         - The format for the timestamps is '%Y-%m-%d || %H:%M:%S:%f'.
     """
-    created_at: datetime = datetime.now(pytz.timezone("Asia/Kolkata")).strftime(
+    created_at: str = datetime.now(pytz.timezone("Asia/Kolkata")).strftime(
         "%Y-%m-%d || %H:%M:%S:%f"
     )
-    updated_at: datetime = datetime.now(pytz.timezone("Asia/Kolkata")).strftime(
+    updated_at: str = datetime.now(pytz.timezone("Asia/Kolkata")).strftime(
         "%Y-%m-%d || %H:%M:%S:%f"
     )
