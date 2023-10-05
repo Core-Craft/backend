@@ -1,7 +1,9 @@
-from pydantic import BaseModel, EmailStr, constr, validator
 from datetime import datetime
 from typing import List
+
 from bson import ObjectId
+from pydantic import BaseModel
+
 from .utils import TimestampMixin
 
 
