@@ -2,45 +2,45 @@ from datetime import datetime
 
 import pymongo
 import pytz
-
 from app.exceptions.custom_exceptions import MissingAttributeError
 
 
 class DataBase:
     """
-    Provides a MongoDB database interaction utility.
+    A utility class for interacting with MongoDB databases.
 
-    This class allows you to interact with a MongoDB database using methods for connecting, validating input data, uploading, querying, updating, and deleting data.
+    This class provides methods for connecting to a MongoDB instance, validating input data, and performing various database operations such as uploading, querying, updating, and deleting data.
 
     Args:
-        db_url (str, optional): The database connection URL. If provided, the class will establish a connection to the specified MongoDB instance.
+        db_url (str, optional): The connection URL for the MongoDB instance.
 
     Attributes:
-        database_url (str): The database connection URL.
+        database_url (str): The URL of the connected MongoDB instance.
         mongod (pymongo.MongoClient): The MongoDB client instance established using the provided URL.
 
     Methods:
         - connect(): Establishes a connection to the MongoDB instance.
         - validate(): Validates input data and raises errors for missing or invalid attributes.
-        - upload(): Inserts data into the specified database and collection.
-        - query(): Retrieves data from the specified database and collection based on provided filters.
-        - update(): Updates data in the specified database and collection based on provided filters.
-        - delete(): Deletes data from the specified database and collection based on provided filters.
+        - upload(): Inserts data into a specified database and collection.
+        - query(): Retrieves data from a specified database and collection based on provided filters.
+        - update(): Updates data in a specified database and collection based on provided filters.
+        - delete(): Deletes data from a specified database and collection based on provided filters.
 
-    Note:
-        - The class is designed to be used for MongoDB database interactions.
+    Notes:
+        - This class is designed for MongoDB database interactions.
         - You can connect to a MongoDB instance by providing the `db_url` parameter during initialization.
         - The provided methods handle data validation and various database operations.
     """
 
     def __init__(self, db_url=None):
-        """_summary_
-        initiate mongodb instance
+        """Initialize the MongoDB client instance.
 
         Args:
-            db_url (str): database connection url
-        Response:
-            self.mongod: mongodb instance
+            db_url (str): The database connection URL.
+
+        Raises:
+            MissingAttributeError: If `db_url` is not provided.
+            TypeError: If `db_url` is not a string.
         """
         if not db_url:
             raise MissingAttributeError("db_url is required")
@@ -52,11 +52,10 @@ class DataBase:
         self.mongod = self.connect()
 
     def connect(self):
-        """_summary_
-        acts as middleware while connecting to mongo instance
+        """Establish a connection to the MongoDB instance.
 
         Returns:
-            obj: mongo client
+            pymongo.MongoClient: The MongoDB client instance.
         """
         return pymongo.MongoClient(self.database_url)
 
@@ -70,10 +69,22 @@ class DataBase:
         filter=None,
         bulk=False,
     ):
-        """_summary_
+        """Validate input data and attributes.
 
-        Acts as middleware (serializer)
-        accepts multiple arguments and raise MissingAttributeError & TypeError if missing/invalid
+        Acts as middleware for validating input data and attributes.
+
+        Args:
+            db_name (str): The name of the database.
+            table_name (str): The name of the collection (table).
+            data_opt (bool, optional): Indicates whether data validation is required.
+            data (dict or list, optional): The data to be validated.
+            filter_opt (bool, optional): Indicates whether filter validation is required.
+            filter (dict, optional): The filter to be validated.
+            bulk (bool, optional): Indicates whether bulk validation is required.
+
+        Raises:
+            MissingAttributeError: If any required attribute is missing.
+            TypeError: If any attribute has an unexpected type.
         """
         if not db_name:
             raise MissingAttributeError("db_name is required")
@@ -111,17 +122,17 @@ class DataBase:
             )
 
     def upload(self, db_name=None, table_name=None, data=None):
-        """_summary_
+        """Insert data into a specified database and collection.
 
         Args:
-            db_name (str): database name.
-            table_name (str): table name.
-            data (dict, list): data to be dumped over database.
-                dict -> to be used for single insertion.
-                list -> to be used for bulk insertion.
+            db_name (str): The name of the database.
+            table_name (str): The name of the collection (table).
+            data (dict or list): The data to be inserted.
+                - If dict, used for single insertion.
+                - If list, used for bulk insertion.
 
         Returns:
-            response: response code, data
+            pymongo.InsertOneResult or pymongo.InsertManyResult: The response object indicating the result of the insertion.
         """
         self.validate(db_name, table_name, data_opt=True, data=data)
 
@@ -142,18 +153,17 @@ class DataBase:
         return response
 
     def query(self, db_name=None, table_name=None, filter=None, bulk=False):
-        """_summary_
+        """Retrieve data from a specified database and collection based on filters.
 
         Args:
-            db_name (str): database name.
-            table_name (str): table name.
-            filter (dict): filter to be applied over search query
-            bulk (bool): multiple results will be returned, if True
+            db_name (str): The name of the database.
+            table_name (str): The name of the collection (table).
+            filter (dict): The filter to be applied to the search query.
+            bulk (bool): If True, multiple results will be returned.
 
         Returns:
-            response: response code, data
+            pymongo.cursor.Cursor or dict: The retrieved data.
         """
-
         self.validate(
             db_name,
             table_name,
@@ -178,17 +188,16 @@ class DataBase:
         return response
 
     def update(self, db_name=None, table_name=None, data=None, bulk=False):
-        """_summary_
+        """Update data in a specified database and collection based on filters.
 
         Args:
-            db_name (str): database name.
-            table_name (str): table name.
-            data (dict): data to be updated
-            bulk (bool): multiple results will be updated, if True
-
+            db_name (str): The name of the database.
+            table_name (str): The name of the collection (table).
+            data (dict): The data to be updated.
+            bulk (bool): If True, multiple results will be updated.
 
         Returns:
-            response: response code, data
+            pymongo.UpdateResult: The response object indicating the result of the update operation.
         """
         self.validate(db_name, table_name, data_opt=True, data=data, bulk=bulk)
 
@@ -208,15 +217,19 @@ class DataBase:
         return response
 
     def delete(self, db_name=None, table_name=None, filter=None):
-        """_summary_
+        """
+        Delete data from a specified database collection based on a filter.
 
         Args:
-            db_name (str): database name.
-            table_name (str): table name.
-            filter (dict): filter to be applied over search query
+            db_name (str): The name of the database.
+            table_name (str): The name of the collection (table) from which data will be deleted.
+            filter (dict): The filter to be applied to specify which data to delete.
 
         Returns:
-            response: response code, data
+            pymongo.DeleteResult: The response object indicating the result of the delete operation.
+        Raises:
+            MissingAttributeError: If any required attribute is missing.
+            TypeError: If any attribute has an unexpected type.
         """
         self.validate(db_name, table_name, filter_opt=True, filter=filter)
 
