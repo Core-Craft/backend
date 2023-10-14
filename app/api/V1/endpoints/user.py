@@ -3,8 +3,10 @@ from typing import List
 from fastapi import APIRouter, HTTPException
 
 from app.models.user import User as UserModel
-from app.schemas.user import UserIn, UserOut, UserSearch, UserUpdate
-from .utils import hash_password
+from app.schemas.user import (
+    UserIn, UserOut, UserSearch, UserUpdate, UserLogin
+)
+from .utils import hash_password, verify_password
 
 user = APIRouter()
 
@@ -138,6 +140,23 @@ async def register_user(user_data: UserIn):
         }
     else:
         return {"status": "failure", "message": "User registration failed"}
+
+
+@user.post("/user/login", response_model=UserOut)
+async def login_user(data: UserLogin):
+    """
+    check user credentials for login
+    i/p: email and password
+    """
+    user_instance = UserModel()
+    user_data = user_instance.filter(filter={'email': data.email})
+    if len(user_data) > 0:
+        user_obj = user_data[0]
+        if verify_password(data.password, user_obj['password']):
+            return user_obj
+        raise HTTPException(status_code=400, detail="Invalid password")
+
+    raise HTTPException(status_code=400, detail="Invalid credentials")
 
 
 @user.patch("/user/update/")
