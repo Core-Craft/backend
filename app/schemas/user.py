@@ -186,3 +186,11 @@ class UserUpdate(BaseModel):
         """
 
         from_attributes = True
+
+
+class UserLogin(BaseModel):
+    '''
+    Represents a user model for login user.
+    '''
+    email: str
+    password: str
