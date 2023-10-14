@@ -117,6 +117,14 @@ async def register_user(user_data: UserIn):
     except ValueError as e:
         raise HTTPException(status_code=400, detail=f"Invalid user data: {e}")
 
+    # checking existing user with email
+    exist_users_list = user_instance.filter(
+                filter={'email': user_data.email}
+            )
+    if len(exist_users_list) > 0:
+        raise HTTPException(status_code=400,
+                            detail="User with this email already exists")
+
     try:
         # saving hashed password in db
         user_pass = user_dict['password']
