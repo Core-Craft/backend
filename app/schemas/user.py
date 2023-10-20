@@ -20,7 +20,7 @@ class BaseUser(BaseModel):
             - 1: Admin
             - 2: Staff
             - 3: User
-            
+
     Config:
         from_attributes (bool): Indicates whether attribute values should be populated from the corresponding class attributes when creating an instance. Defaults to True.
     """
@@ -49,6 +49,8 @@ class UserIn(TimestampMixin, BaseUser):
     Attributes:
         password (str): The password associated with the user.
         is_active (bool): Indicates whether the user account is active. Defaults to True.
+        is_staff (bool): Indicates whether the user has staff privileges. Defaults to False.
+        is_admin (bool): Indicates whether the user has admin privileges. Defaults to False.
         is_superuser (bool): Indicates whether the user has superuser privileges. Defaults to False.
 
     Validators:
@@ -68,6 +70,8 @@ class UserIn(TimestampMixin, BaseUser):
 
     password: str
     is_active: bool = True
+    is_staff: bool = False
+    is_admin: bool = False
     is_superuser: bool = False
 
     @validator("aadhar_no", pre=True, always=True)
@@ -195,8 +199,9 @@ class UserUpdate(BaseModel):
 
 
 class UserLogin(BaseModel):
-    '''
+    """
     Represents a user model for login user.
-    '''
+    """
+
     email: str
     password: str
