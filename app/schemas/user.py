@@ -1,7 +1,7 @@
 import re
 
 from bson import ObjectId
-from pydantic import BaseModel, EmailStr, constr, validator
+from pydantic import BaseModel, EmailStr, constr, conint, validator
 
 from .utils import TimestampMixin
 
@@ -15,8 +15,12 @@ class BaseUser(BaseModel):
         email (EmailStr, optional): The email address of the user, if provided.
         phone_no (str): The phone number of the user.
         aadhar_no (int, optional): The Aadhar number of the user if provided.
-        user_role (str): The role or designation of the user, constrained to 50 characters with leading/trailing whitespaces stripped.
-
+        user_role (int, optional): The role or designation of the user, constrained to values:
+            - 0: Super Admin
+            - 1: Admin
+            - 2: Staff
+            - 3: User
+            
     Config:
         from_attributes (bool): Indicates whether attribute values should be populated from the corresponding class attributes when creating an instance. Defaults to True.
     """
@@ -25,7 +29,7 @@ class BaseUser(BaseModel):
     email: EmailStr | None = None
     phone_no: str | None = None
     aadhar_no: int | None = None
-    user_role: constr(strip_whitespace=True, max_length=50) | None = None
+    user_role: conint(ge=0, le=3) | None = None
 
     class Config:
         """
