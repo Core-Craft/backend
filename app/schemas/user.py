@@ -22,7 +22,6 @@ class BaseUser(BaseModel):
         from_attributes (bool): Indicates whether attribute values should be populated from the corresponding class attributes when creating an instance. Defaults to True.
     """
 
-    user_uuid: int | None = None
     full_name: constr(strip_whitespace=True, max_length=50) | None = None
     email: EmailStr | None = None
     phone_no: str | None = None
@@ -65,7 +64,6 @@ class UserIn(TimestampMixin, BaseUser):
 
     """
 
-    _id: ObjectId
     password: str
     is_active: bool = True
     is_superuser: bool = False
@@ -118,7 +116,7 @@ class UserOut(BaseUser):
     Note:
         This class does not introduce additional attributes or behavior beyond what is defined in the `BaseUser` class. It serves as a specialized version of `BaseUser` specifically designed for representing user data in response objects.
     """
-
+    user_uuid: int | None = None
     class Config:
         """
         Configuration options for Pydantic models.
