@@ -3,9 +3,7 @@ from typing import List
 from fastapi import APIRouter, HTTPException
 
 from app.models.user import User as UserModel
-from app.schemas.user import (
-    UserIn, UserOut, UserSearch, UserUpdate, UserLogin
-)
+from app.schemas.user import UserIn, UserOut, UserSearch, UserUpdate, UserLogin
 from .utils import hash_password, verify_password
 
 user = APIRouter()
@@ -107,9 +105,12 @@ async def register_user(user_data: UserIn):
 
     Returns:
         dict: A dictionary containing the status of the registration operation and a message.
-            - "status": "success" indicating a successful registration.
-            - "message": A message confirming the success of the registration operation.
-            - "data": A dictionary containing user information including ID, full name, and phone number.
+            - "status" (str): "success" indicating a successful registration or "failure" if the registration failed.
+            - "message" (str): A message confirming the success or failure of the registration operation.
+            - "data" (dict, optional): A dictionary containing user information, including ID, full name, and phone number, if the registration is successful.
+
+    Raises:
+        HTTPException: If the provided user data is invalid or if a user with the same email already exists.
     """
 
     user_instance = UserModel()
@@ -119,18 +120,17 @@ async def register_user(user_data: UserIn):
     except ValueError as e:
         raise HTTPException(status_code=400, detail=f"Invalid user data: {e}")
 
-    # checking existing user with email
-    exist_users_list = user_instance.filter(
-        filter={'email': user_data.email})
-    if len(exist_users_list) > 0:
-        raise HTTPException(status_code=400,
-                            detail="User with this email already exists")
+    if user_dict["email"]:
+        # Checking for an existing user with the same email
+        exist_users_list = user_instance.filter(filter={"email": user_data.email})
+        if len(exist_users_list) > 0:
+            raise HTTPException(
+                status_code=400, detail="User with this email already exists"
+            )
 
     try:
-        # saving hashed password in db
-        user_pass = user_dict['password']
-        encypted_pass = hash_password(user_pass)
-        user_dict['password'] = encypted_pass
+        encrypted_pass = hash_password(user_dict["password"])
+        user_dict["password"] = encrypted_pass
         response = user_instance.save(data=user_dict)
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to register user: {e}")
@@ -156,10 +156,10 @@ async def login_user(data: UserLogin):
     i/p: email and password
     """
     user_instance = UserModel()
-    user_data = user_instance.filter(filter={'email': data.email})
+    user_data = user_instance.filter(filter={"email": data.email})
     if len(user_data) > 0:
         user_obj = user_data[0]
-        if verify_password(data.password, user_obj['password']):
+        if verify_password(data.password, user_obj["password"]):
             return user_obj
         raise HTTPException(status_code=400, detail="Invalid password")
 
