@@ -1,5 +1,6 @@
 from datetime import datetime
 
+import secrets
 import pytz
 from pydantic import BaseModel
 
@@ -18,9 +19,23 @@ class TimestampMixin(BaseModel):
         - The timestamps are generated in the 'Asia/Kolkata' timezone.
         - The format for the timestamps is '%Y-%m-%d || %H:%M:%S:%f'.
     """
+
     created_at: str = datetime.now(pytz.timezone("Asia/Kolkata")).strftime(
         "%Y-%m-%d || %H:%M:%S:%f"
     )
     updated_at: str = datetime.now(pytz.timezone("Asia/Kolkata")).strftime(
         "%Y-%m-%d || %H:%M:%S:%f"
     )
+
+
+def generate_password() -> str:
+    """
+    Generate a random password using secrets.token_urlsafe.
+
+    Returns:
+        str: A randomly generated password.
+
+    The password is generated with 12 characters using secrets.token_urlsafe,
+    making it suitable for secure password generation.
+    """
+    return secrets.token_urlsafe(12)
