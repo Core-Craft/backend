@@ -222,7 +222,7 @@ class UserLogin(BaseModel):
 
     user_uuid: int
     password: str
-
+    
     class Config:
         """
         Configuration options for Pydantic models.
