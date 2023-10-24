@@ -11,7 +11,6 @@ class BaseUser(BaseModel):
     Represents the base user model with common attributes.
 
     Attributes:
-        user_uuid (int): The unique identifier for the user.
         full_name (str): The full name of the user, constrained to 50 characters with leading/trailing whitespaces stripped.
         email (EmailStr, optional): The email address of the user, if provided.
         phone_no (str): The phone number of the user.
@@ -22,7 +21,6 @@ class BaseUser(BaseModel):
         from_attributes (bool): Indicates whether attribute values should be populated from the corresponding class attributes when creating an instance. Defaults to True.
     """
 
-    user_uuid: int | None = None
     full_name: constr(strip_whitespace=True, max_length=50) | None = None
     email: EmailStr | None = None
     phone_no: str | None = None
@@ -45,7 +43,6 @@ class UserIn(TimestampMixin, BaseUser):
     Represents a user input model with additional fields and validation.
 
     Attributes:
-        _id (ObjectId): The unique identifier for the user.
         password (str): The password associated with the user.
         is_active (bool): Indicates whether the user account is active. Defaults to True.
         is_superuser (bool): Indicates whether the user has superuser privileges. Defaults to False.
@@ -65,7 +62,6 @@ class UserIn(TimestampMixin, BaseUser):
 
     """
 
-    _id: ObjectId
     password: str
     is_active: bool = True
     is_superuser: bool = False
@@ -112,13 +108,16 @@ class UserOut(BaseUser):
 
     This class inherits attributes and behavior from the `BaseUser` class and is intended to be used for representing user data in output or response objects.
 
+    Attributes:
+        - user_uuid (int): The unique identifier for the user.
+
     Inherits from:
         - BaseUser: The base user model with common attributes.
 
     Note:
         This class does not introduce additional attributes or behavior beyond what is defined in the `BaseUser` class. It serves as a specialized version of `BaseUser` specifically designed for representing user data in response objects.
     """
-
+    user_uuid: int | None = None
     class Config:
         """
         Configuration options for Pydantic models.
@@ -136,6 +135,9 @@ class UserSearch(BaseUser):
 
     This class inherits attributes and behavior from the `BaseUser` class but sets several fields to None, allowing them to be used as optional filter criteria when searching for users.
 
+    Attributes:
+        - user_uuid (int): The unique identifier for the user.
+
     Inherits from:
         - BaseUser: The base user model with common attributes.
 
@@ -143,7 +145,7 @@ class UserSearch(BaseUser):
         - Fields that are set to None, such as `user_uuid`, `full_name`, `user_role`, and `phone_no`, can be used as optional filter criteria when performing user searches.
         - When creating instances of this class, you can specify values for specific fields to filter user search results based on the provided criteria.
     """
-
+    user_uuid: int | None = None
     class Config:
         """
         Configuration options for Pydantic models.
