@@ -186,7 +186,7 @@ async def login_user(user_data: UserLogin):
         raise HTTPException(
             status_code=500, detail=f"Failed to retrieve existing user data: {e}"
         )
-        
+
     if user_data:
         if verify_password(user_dict["password"], user_data[0]["password"]):
             return {
@@ -202,7 +202,6 @@ async def login_user(user_data: UserLogin):
             raise HTTPException(status_code=401, detail="Invalid credentials")
     else:
         raise HTTPException(status_code=404, detail="User not found")
-
 
 
 @user.patch("/user/update/")
