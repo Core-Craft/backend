@@ -88,7 +88,9 @@ async def filter_users(filter: UserSearch):
     try:
         user_data = user_instance.filter(filter=user_dict)
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Failed to register user: {e}")
+        raise HTTPException(
+            status_code=500, detail=f"Failed to retrieve existing user data: {e}"
+        )
 
     return user_data
 
@@ -149,21 +151,58 @@ async def register_user(user_data: UserIn):
         return {"status": "failure", "message": "User registration failed"}
 
 
-@user.post("/user/login", response_model=UserOut)
-async def login_user(data: UserLogin):
+@user.post("/user/login")
+async def login_user(user_data: UserLogin):
     """
-    check user credentials for login
-    i/p: email and password
+    Log in an existing user.
+
+    This endpoint allows an existing user to log in based on the provided user data in the UserLogin model.
+
+    Args:
+        user_data (UserLogin): The UserLogin model containing user login data, including email and password.
+
+    Returns:
+        dict: A dictionary containing the status of the login operation and a message.
+            - "status" (str): "success" indicating a successful login or "failure" if the login failed.
+            - "message" (str): A message confirming the success or failure of the login operation.
+            - "data" (dict, optional): A dictionary containing user information, including ID, full name, and phone number, if the login is successful.
+
+    Raises:
+        HTTPException 400: If the provided user data is invalid.
+        HTTPException 500: If there is an issue with retrieving existing user data.
+        HTTPException 404: If no user with the provided user_uuid exists.
+        HTTPException 401: If the provided password is incorrect.
     """
     user_instance = UserModel()
-    user_data = user_instance.filter(filter={"email": data.email})
-    if len(user_data) > 0:
-        user_obj = user_data[0]
-        if verify_password(data.password, user_obj["password"]):
-            return user_obj
-        raise HTTPException(status_code=400, detail="Invalid password")
 
-    raise HTTPException(status_code=400, detail="Invalid credentials")
+    try:
+        user_dict = user_data.model_dump(exclude_unset=True)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=f"Invalid request data: {e}")
+
+    try:
+        user_data = user_instance.filter(filter={"user_uuid": user_dict["user_uuid"]})
+    except Exception as e:
+        raise HTTPException(
+            status_code=500, detail=f"Failed to retrieve existing user data: {e}"
+        )
+        
+    if user_data:
+        if verify_password(user_dict["password"], user_data[0]["password"]):
+            return {
+                "status": "success",
+                "message": "User login successful",
+                "data": {
+                    "id": user_data[0]["user_uuid"],
+                    "full_name": user_data[0]["full_name"],
+                    "phone_no": user_data[0]["phone_no"],
+                },
+            }
+        else:
+            raise HTTPException(status_code=401, detail="Invalid credentials")
+    else:
+        raise HTTPException(status_code=404, detail="User not found")
+
 
 
 @user.patch("/user/update/")
