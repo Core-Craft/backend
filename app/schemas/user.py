@@ -1,9 +1,8 @@
 import re
 
-from bson import ObjectId
-from pydantic import BaseModel, EmailStr, constr, conint, validator
+from pydantic import BaseModel, EmailStr, conint, constr, validator
 
-from .utils import TimestampMixin
+from .utils import TimestampMixin, generate_password
 
 
 class BaseUser(BaseModel):
@@ -47,7 +46,7 @@ class UserIn(TimestampMixin, BaseUser):
     Represents a user input model with additional fields and validation.
 
     Attributes:
-        password (str): The password associated with the user.
+        password (str): The password associated with the user. Defaults to randomly generated password.
         is_active (bool): Indicates whether the user account is active. Defaults to True.
         is_staff (bool): Indicates whether the user has staff privileges. Defaults to False.
         is_admin (bool): Indicates whether the user has admin privileges. Defaults to False.
@@ -68,7 +67,7 @@ class UserIn(TimestampMixin, BaseUser):
 
     """
 
-    password: str
+    password: str = generate_password()
     is_active: bool = True
     is_staff: bool = False
     is_admin: bool = False
@@ -125,7 +124,9 @@ class UserOut(BaseUser):
     Note:
         This class does not introduce additional attributes or behavior beyond what is defined in the `BaseUser` class. It serves as a specialized version of `BaseUser` specifically designed for representing user data in response objects.
     """
+
     user_uuid: int | None = None
+
     class Config:
         """
         Configuration options for Pydantic models.
@@ -153,7 +154,9 @@ class UserSearch(BaseUser):
         - Fields that are set to None, such as `user_uuid`, `full_name`, `user_role`, and `phone_no`, can be used as optional filter criteria when performing user searches.
         - When creating instances of this class, you can specify values for specific fields to filter user search results based on the provided criteria.
     """
+
     user_uuid: int | None = None
+
     class Config:
         """
         Configuration options for Pydantic models.
@@ -217,7 +220,7 @@ class UserLogin(BaseModel):
         - Config.from_attributes (bool): Determines whether attribute values should be populated from class attributes when creating an instance of the model. If True, class attributes with the same name as fields in the model will be used to initialize those fields. Defaults to True, enabling attribute initialization from class attributes.
     """
 
-    email: str
+    user_uuid: int
     password: str
 
     class Config:
