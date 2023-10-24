@@ -198,8 +198,32 @@ class UserUpdate(BaseModel):
 
 class UserLogin(BaseModel):
     """
-    Represents a user model for login user.
+    Represents a user login model for authenticating user access.
+
+    This class includes two fields:
+    - user_uuid (int): The unique identifier for the user.
+    - password (str): The user's password for authentication.
+
+    Attributes:
+        user_uuid (int): The unique identifier for the user.
+        password (str): The user's password for authentication.
+
+    Note:
+        Use this class to pass the user's unique identifier and password for user authentication.
+
+    Configuration Options:
+        - Config.from_attributes (bool): Determines whether attribute values should be populated from class attributes when creating an instance of the model. If True, class attributes with the same name as fields in the model will be used to initialize those fields. Defaults to True, enabling attribute initialization from class attributes.
     """
 
     user_uuid: int
     password: str
+    
+    class Config:
+        """
+        Configuration options for Pydantic models.
+
+        Attributes:
+            from_attributes (bool): Determines whether attribute values should be populated from class attributes when creating an instance of the model. If True, class attributes with the same name as fields in the model will be used to initialize those fields. Defaults to True, enabling attribute initialization from class attributes.
+        """
+
+        from_attributes = True
