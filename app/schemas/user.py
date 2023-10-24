@@ -3,7 +3,7 @@ import re
 from bson import ObjectId
 from pydantic import BaseModel, EmailStr, constr, conint, validator
 
-from .utils import TimestampMixin
+from .utils import TimestampMixin, generate_password
 
 
 class BaseUser(BaseModel):
@@ -72,7 +72,7 @@ class UserIn(TimestampMixin, BaseUser):
     """
 
     _id: ObjectId
-    password: str
+    password: str = generate_password()
     is_active: bool = True
     is_staff: bool = False
     is_admin: bool = False
@@ -201,5 +201,5 @@ class UserLogin(BaseModel):
     Represents a user model for login user.
     """
 
-    email: str
+    user_uuid: int
     password: str
