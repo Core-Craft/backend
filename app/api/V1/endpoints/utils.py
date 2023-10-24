@@ -26,13 +26,12 @@ def hash_password(password: str):
     return pwd_context.hash(password, rounds=12)
 
 
-def verify_password(password: str):
+def verify_password(password: str, hashed_password: str):
     """
     Verifies a plaintext password against a previously hashed password using bcrypt.
 
     Args:
         password (str): The plaintext password to be verified.
-        hashed_password (str): The previously hashed password to compare against.
 
     Returns:
         bool: True if the plaintext password matches the hashed password, False otherwise.
@@ -42,9 +41,7 @@ def verify_password(password: str):
 
 
     Example:
-    >>> hashed = hash_password("my_secure_password")
-    >>> is_valid = verify_password("my_secure_password", hashed)
+    >>> is_valid = verify_password("my_secure_password", hashed_password)
 
     """
-    hashed_password = hash_password(password)
     return pwd_context.verify(password, hashed_password)
