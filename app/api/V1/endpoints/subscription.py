@@ -3,7 +3,7 @@ from typing import List
 from fastapi import APIRouter, HTTPException
 
 from app.models.subscription import Subscription as SubscriptionModel
-from app.schemas.subscription import SubscriptionIn
+from app.schemas.subscription import SubscriptionIn, SubUpdate
 from app.models.user import User as UserModel
 
 subscription = APIRouter()
@@ -69,15 +69,15 @@ async def get_user_subscriptions():
     return subscription_data
 
 
-@subscription.post("/user/subscription/", response_model=SubscriptionIn)
+@subscription.post("/user/subscription/")
 async def create_user_subscriptions(subscription: SubscriptionIn):
     """
-    Get a list of user subscriptions.
+    Create a new Subscription
 
-    This endpoint retrieves a list of all user subscription data. The response includes subscription information for all users.
+    This endpoint create a new subscription. The response includes message of success/failure .
 
-    Returns:
-        List[SubscriptionIn]: A list of user subscription data.
+    Args:
+        data (SubscriptionIn): The SubscriptionIn model containing subscription data to be created.
 
     Raises:
         HTTPException(404): If no user subscriptions are found.
@@ -92,7 +92,8 @@ async def create_user_subscriptions(subscription: SubscriptionIn):
             if user_data is None:
                 raise Exception("No user with this UUID")
 
-            user_subs = subscription_instance.filter(filter={"user_uuid":sub_dict["user_uuid"]})
+            user_subs = subscription_instance.filter(
+                filter={"user_uuid": sub_dict["user_uuid"]})
             if len(user_subs) > 0:
                 raise HTTPException(status_code=400, detail="User with this \
 email already exists")
@@ -100,7 +101,8 @@ email already exists")
         subscription_data = subscription_instance.save(data=sub_dict)
     except Exception as e:
         raise HTTPException(
-            status_code=500, detail=f"Failed to retrieve user subscriptions; Error:  {e}"
+            status_code=500,
+            detail=f"Failed to retrieve user subscriptions; Error:  {e}"
         )
 
     if subscription_data.acknowledged:
@@ -114,3 +116,35 @@ email already exists")
          }
     else:
         return {"status": "failure", "message": "Subscription Creation failed"}
+
+
+@subscription.patch("/user/subscription/")
+async def update_user_subscriptions(subscription: SubUpdate):
+    """
+    Update a Subscription
+
+    This endpoint updates a subscription. The response includes message of success/failure .\
+
+    Args:
+        data (SubUpdate): The SubUpdate model containing filter criteria and updated subscription data.
+
+    Raises:
+        HTTPException(404): If no subscriptions are found.
+        HTTPException(500): If there is an internal server error while retrieving the data.
+    """
+    subscription_instance = SubscriptionModel()
+    try:
+        sub_dict = subscription.model_dump(exclude_unset=True)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=f"Invalid subscription data: {e}")
+
+    try:
+        response = subscription_instance.update(data=sub_dict)
+    except Exception as e:
+        raise HTTPException(status_code=500,
+                            detail=f"Failed to update subscription: {e}")
+
+    if response.acknowledged:
+        return {"status": "success", "message": "Subscription update successful"}
+    else:
+        return {"status": "failure", "message": "Subscription update failed"}
