@@ -139,13 +139,15 @@ class DataBase:
         database = self.mongod[db_name]
         dataset = database[table_name]
 
-        if isinstance(data, dict):
+        if isinstance(data, dict) and data["user_uuid"] is None:
             user_id = (
                 dataset.find()
                 .sort("user_uuid", pymongo.DESCENDING)
                 .limit(1)[0]["user_uuid"]
             )
             data.update({"user_uuid": user_id + 1})
+            response = dataset.insert_one(data)
+        elif isinstance(data, dict) and data["user_uuid"]:
             response = dataset.insert_one(data)
         else:
             response = dataset.insert_many(data)

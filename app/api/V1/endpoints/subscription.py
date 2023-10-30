@@ -4,6 +4,7 @@ from fastapi import APIRouter, HTTPException
 
 from app.models.subscription import Subscription as SubscriptionModel
 from app.schemas.subscription import SubscriptionIn
+from app.models.user import User as UserModel
 
 subscription = APIRouter()
 
@@ -66,3 +67,50 @@ async def get_user_subscriptions():
         raise HTTPException(status_code=404, detail="No user subscriptions found")
 
     return subscription_data
+
+
+@subscription.post("/user/subscription/", response_model=SubscriptionIn)
+async def create_user_subscriptions(subscription: SubscriptionIn):
+    """
+    Get a list of user subscriptions.
+
+    This endpoint retrieves a list of all user subscription data. The response includes subscription information for all users.
+
+    Returns:
+        List[SubscriptionIn]: A list of user subscription data.
+
+    Raises:
+        HTTPException(404): If no user subscriptions are found.
+        HTTPException(500): If there is an internal server error while retrieving the data.
+    """
+    try:
+        subscription_instance = SubscriptionModel()
+        sub_dict = subscription.model_dump(exclude_unset=False)
+        if sub_dict["user_uuid"]:
+            user_instance = UserModel()
+            user_data = user_instance.get(uuid=sub_dict["user_uuid"])
+            if user_data is None:
+                raise Exception("No user with this UUID")
+
+            user_subs = subscription_instance.filter(filter={"user_uuid":sub_dict["user_uuid"]})
+            if len(user_subs) > 0:
+                raise HTTPException(status_code=400, detail="User with this \
+email already exists")
+
+        subscription_data = subscription_instance.save(data=sub_dict)
+    except Exception as e:
+        raise HTTPException(
+            status_code=500, detail=f"Failed to retrieve user subscriptions; Error:  {e}"
+        )
+
+    if subscription_data.acknowledged:
+        return {
+            "status": "success",
+            "message": "Subscription for user created successfully",
+            "data": {
+                "id": sub_dict["user_uuid"],
+                "amount": sub_dict["subscription"][0]["amount"],
+            },
+         }
+    else:
+        return {"status": "failure", "message": "Subscription Creation failed"}
