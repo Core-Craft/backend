@@ -12,6 +12,11 @@ class BaseSubscription(TimestampMixin):
     end_date: datetime
     amount: int
 
+
+class SubscriptionIn(BaseModel):
+    user_uuid: int
+    subscription: List[BaseSubscription]
+
     class Config:
         """
         Configuration options for Pydantic models.
@@ -21,9 +26,3 @@ class BaseSubscription(TimestampMixin):
         """
 
         from_attributes = True
-
-
-class SubscriptionIn(BaseModel):
-    _id: ObjectId
-    user_uuid: int
-    subscription: List[BaseSubscription]
