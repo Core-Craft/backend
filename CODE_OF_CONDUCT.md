@@ -22,16 +22,28 @@ community include:
 * Focusing on what is best not just for us as individuals, but for the
   overall community
 
-Examples of unacceptable behavior include:
+## Expected Behavior
 
-* The use of sexualized language or imagery, and sexual attention or
-  advances
-* Trolling, insulting or derogatory comments, and personal or political attacks
-* Public or private harassment
-* Publishing others' private information, such as a physical or email
-  address, without their explicit permission
-* Other conduct which could reasonably be considered inappropriate in a
-  professional setting
+To contribute positively to our community, we expect all participants to:
+
+- Be respectful and considerate towards others.
+- Use inclusive language and be mindful of your words.
+- Accept and value different opinions, ideas, and experiences.
+- Be open to constructive feedback and engage in healthy discussions.
+- Be mindful of the impact of your words and actions on others.
+- Refrain from any form of harassment, discrimination, or offensive behavior.
+- Respect the privacy and personal boundaries of others.
+- Please refrain from including any sensitive information, such as security credentials or keys, in your repository commits.
+- The use of sexualized language or imagery, and sexual attention or advances
+- Trolling, insulting or derogatory comments, and personal or political attacks
+- Public or private harassment
+- Publishing others' private information, such as a physical or email address, without their explicit permission
+- Other conduct which could reasonably be considered inappropriate in a professional setting
+
+## Reporting and Enforcement
+
+If you witness or experience any behavior that violates this code of conduct, please report it by contacting [contact person or email]. All reports will be handled confidentially and with respect for privacy. The project maintainers are responsible for enforcing this code of conduct and will take appropriate action in response to violations.
+
 
 ## Our Responsibilities
 
