@@ -23,10 +23,10 @@ class BaseSubscription(BaseModel):
         from_attributes (bool): Indicates whether attribute values should be populated from the corresponding class attributes when creating an instance. Defaults to True.
     """
     
-    start_date: datetime.now(pytz.timezone("Asia/Kolkata")).strftime(
+    start_date: str = datetime.now(pytz.timezone("Asia/Kolkata")).strftime(
         "%Y-%m-%d || %H:%M:%S:%f"
     )
-    end_date: datetime.now(pytz.timezone("Asia/Kolkata")).strftime(
+    end_date: str = datetime.now(pytz.timezone("Asia/Kolkata")).strftime(
         "%Y-%m-%d || %H:%M:%S:%f"
     )
     amount: int | None = None
@@ -42,7 +42,20 @@ class BaseSubscription(BaseModel):
         from_attributes = True
 
 
-class SubscriptionIn(BaseModel):
+class SubscriptionIn(TimestampMixin):
+    """
+    Represents an input model for creating a subscription.
+
+    This class inherits from `TimestampMixin` to include timestamp fields for created and updated dates.
+
+    Attributes:
+        user_uuid (int): The unique identifier of the user for whom the subscription is created.
+        subscription (List[BaseSubscription]): A list of subscription objects, where each subscription is based on the `BaseSubscription` model.
+
+    Config:
+        from_attributes (bool): Indicates whether attribute values should be populated from the corresponding class attributes when creating an instance. Defaults to True.
+    """
+    
     user_uuid: int
     subscription: List[BaseSubscription]
 
