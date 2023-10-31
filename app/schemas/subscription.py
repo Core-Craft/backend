@@ -99,13 +99,21 @@ class SubscriptionOut(BaseSubscription):
         from_attributes = True
 
 
-class SubSearch(BaseModel):
+class SubscriptionSearch(BaseSubscription):
     """
-    Represents a subscription search model with optional filter criteria.
+    Represents a user search model with optional filter criteria for subscription information.
+
+    This class inherits attributes and behavior from the `BaseSubscription` class but sets several fields to None, allowing them to be used as optional filter criteria when searching for subscriptions.
 
     Attributes:
-        - user_uuid (int): The unique identifier for the user.
+        user_uuid (int | None): The unique identifier for the user, which can be used as an optional filter criterion when searching for subscriptions.
 
+    Inherits from:
+        BaseSubscription: The base subscription model with common subscription attributes.
+
+    Note:
+        - Fields that are set to None, such as `user_uuid`, `start_date`, `end_date`, and `amount`, can be used as optional filter criteria when performing subscription searches.
+        - When creating instances of this class, you can specify values for specific fields to filter subscription search results based on the provided criteria.
     """
 
     user_uuid: int | None = None
