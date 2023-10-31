@@ -14,7 +14,7 @@ class BaseSubscription(BaseModel):
 
     This class is designed to serve as a base for subscription models. It includes attributes to represent
     the start date, end date, and amount of the subscription.
-    
+
     Attributes:
         start_date (datetime): The timestamp indicating the creation time of the object.
         end_date (datetime): The timestamp indicating the last update time of the object.
@@ -22,7 +22,7 @@ class BaseSubscription(BaseModel):
     Config:
         from_attributes (bool): Indicates whether attribute values should be populated from the corresponding class attributes when creating an instance. Defaults to True.
     """
-    
+
     start_date: str = datetime.now(pytz.timezone("Asia/Kolkata")).strftime(
         "%Y-%m-%d || %H:%M:%S:%f"
     )
@@ -30,7 +30,7 @@ class BaseSubscription(BaseModel):
         "%Y-%m-%d || %H:%M:%S:%f"
     )
     amount: int | None = None
-    
+
     class Config:
         """
         Configuration options for Pydantic models.
@@ -55,9 +55,38 @@ class SubscriptionIn(TimestampMixin):
     Config:
         from_attributes (bool): Indicates whether attribute values should be populated from the corresponding class attributes when creating an instance. Defaults to True.
     """
-    
+
     user_uuid: int
     subscription: List[BaseSubscription]
+
+    class Config:
+        """
+        Configuration options for Pydantic models.
+
+        Attributes:
+            from_attributes (bool): Determines whether attribute values should be populated from class attributes when creating an instance of the model. If True, class attributes with the same name as fields in the model will be used to initialize those fields. Defaults to True, enabling attribute initialization from class attributes.
+        """
+
+        from_attributes = True
+
+
+class SubscriptionOut(BaseSubscription):
+    """
+    Represents a user output model for subscription information.
+
+    This class inherits attributes and behavior from the `BaseSubscription` class and is intended to be used for representing subscription data in output or response objects.
+
+    Attributes:
+        user_uuid (int): The unique identifier for the user associated with the subscription.
+
+    Inherits from:
+        BaseSubscription: The base subscription model with common subscription attributes.
+
+    Note:
+        This class does not introduce additional attributes or behavior beyond what is defined in the `BaseSubscription` class. It serves as a specialized version of `BaseSubscription` specifically designed for representing subscription data in response objects.
+    """
+
+    user_uuid: int
 
     class Config:
         """
@@ -94,11 +123,11 @@ class SubSearch(BaseModel):
 
 class SubUpdate(BaseModel):
     """
-        Represents a subscription update model for modifying subscription data.
+    Represents a subscription update model for modifying subscription data.
 
-        This class includes two fields:
-        - filter: An instance of the SubSearch class that specifies the filter criteria for identifying the subscription to be updated.
-        - sub_data: An instance of the SubscriptionIn class containing updated subscription data.
+    This class includes two fields:
+    - filter: An instance of the SubSearch class that specifies the filter criteria for identifying the subscription to be updated.
+    - sub_data: An instance of the SubscriptionIn class containing updated subscription data.
     """
 
     filter: SubSearch
