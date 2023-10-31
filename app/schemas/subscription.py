@@ -2,7 +2,6 @@ from datetime import datetime
 from typing import List
 
 import pytz
-from bson import ObjectId
 from pydantic import BaseModel
 
 from .utils import TimestampMixin
@@ -129,17 +128,24 @@ class SubscriptionSearch(BaseSubscription):
         from_attributes = True
 
 
-class SubUpdate(BaseModel):
+class SubscriptionUpdate(BaseModel):
     """
     Represents a subscription update model for modifying subscription data.
 
     This class includes two fields:
-    - filter: An instance of the SubSearch class that specifies the filter criteria for identifying the subscription to be updated.
-    - sub_data: An instance of the SubscriptionIn class containing updated subscription data.
+    - user_uuid (int): The unique identifier for the user whose subscription is being updated.
+    - user_data (BaseSubscription): An instance of the `BaseSubscription` class containing the updated subscription data.
+
+    Attributes:
+        user_uuid (int): The unique identifier for the user whose subscription is being updated.
+        user_data (BaseSubscription): An instance of the `BaseSubscription` class containing the updated subscription data.
+
+    Config:
+        from_attributes (bool): Indicates whether attribute values should be populated from the corresponding class attributes when creating an instance. Defaults to True.
     """
 
-    filter: SubSearch
-    user_data: SubscriptionIn
+    user_uuid: int
+    user_data: BaseSubscription
 
     class Config:
         """
