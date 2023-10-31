@@ -1,16 +1,45 @@
 from datetime import datetime
 from typing import List
 
+import pytz
 from bson import ObjectId
 from pydantic import BaseModel
 
 from .utils import TimestampMixin
 
 
-class BaseSubscription(TimestampMixin):
-    start_date: datetime
-    end_date: datetime
-    amount: int
+class BaseSubscription(BaseModel):
+    """
+    A base subscription model for representing subscription information using Pydantic.
+
+    This class is designed to serve as a base for subscription models. It includes attributes to represent
+    the start date, end date, and amount of the subscription.
+    
+    Attributes:
+        start_date (datetime): The timestamp indicating the creation time of the object.
+        end_date (datetime): The timestamp indicating the last update time of the object.
+        amount (int, optional): The subscription amount of the user if provided.
+    Config:
+        from_attributes (bool): Indicates whether attribute values should be populated from the corresponding class attributes when creating an instance. Defaults to True.
+    """
+    
+    start_date: datetime.now(pytz.timezone("Asia/Kolkata")).strftime(
+        "%Y-%m-%d || %H:%M:%S:%f"
+    )
+    end_date: datetime.now(pytz.timezone("Asia/Kolkata")).strftime(
+        "%Y-%m-%d || %H:%M:%S:%f"
+    )
+    amount: int | None = None
+    
+    class Config:
+        """
+        Configuration options for Pydantic models.
+
+        Attributes:
+            from_attributes (bool): Determines whether attribute values should be populated from class attributes when creating an instance of the model. If True, class attributes with the same name as fields in the model will be used to initialize those fields. Defaults to True, enabling attribute initialization from class attributes.
+        """
+
+        from_attributes = True
 
 
 class SubscriptionIn(BaseModel):
