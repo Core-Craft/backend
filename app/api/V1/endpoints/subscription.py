@@ -146,6 +146,11 @@ async def update_user_subscriptions(subscription: SubscriptionUpdate):
     Raises:
         HTTPException(404): If no subscriptions are found.
         HTTPException(500): If there is an internal server error while retrieving the data.
+    
+    Returns:
+        dict: A dictionary containing the status of the update operation and a message.
+            - "status": Either "success" or "failure" indicating the result of the update.
+            - "message": A message describing the result of the update operation.
     """
     subscription_instance = SubscriptionModel()
     try:
