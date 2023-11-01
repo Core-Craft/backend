@@ -93,37 +93,33 @@ async def create_user_subscriptions(subscription: SubscriptionIn):
     except ValueError as e:
         raise HTTPException(status_code=400, detail=f"Invalid subscription data: {e}")
 
-    if sub_dict["user_uuid"]:
-        try:
-            user_instance = UserModel()
-            user_data = user_instance.get(uuid=sub_dict["user_uuid"])
-        except Exception as e:
-            raise HTTPException(
-                status_code=500, detail=f"Failed to retrieve user data: {e}"
-            )
+    try:
+        user_instance = UserModel()
+        user_data = user_instance.get(uuid=sub_dict["user_uuid"])
+    except Exception as e:
+        raise HTTPException(
+            status_code=500, detail=f"Failed to retrieve user data: {e}"
+        )
 
-        if user_data is None:
-            raise HTTPException(status_code=404, detail="User not found")
-        else:
-            user_subscription = subscription_instance.filter(
-                filter={"user_uuid": sub_dict["user_uuid"]}
-            )
-            if len(user_subscription) > 0:
-                raise HTTPException(
-                    status_code=400,
-                    detail="User with this user_uuid already has a subscription",
-                )
-            else:
-                try:
-                    response = subscription_instance.save(data=sub_dict)
-                except Exception as e:
-                    raise HTTPException(
-                        status_code=500,
-                        detail=f"Failed to register user subscription: {e}",
-                    )
+    if user_data is None:
+        raise HTTPException(status_code=404, detail="User not found")
     else:
-        raise HTTPException(status_code=400, detail="user_uuid is mandatory")
-
+        user_subscription = subscription_instance.filter(
+            filter={"user_uuid": sub_dict["user_uuid"]}
+        )
+        if len(user_subscription) > 0:
+            raise HTTPException(
+                status_code=400,
+                detail="User with this user_uuid already has a subscription",
+            )
+        else:
+            try:
+                response = subscription_instance.save(data=sub_dict)
+            except Exception as e:
+                raise HTTPException(
+                    status_code=500,
+                    detail=f"Failed to register user subscription: {e}",
+                )
     if response.acknowledged:
         return {
             "status": "success",
