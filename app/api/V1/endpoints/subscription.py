@@ -71,6 +71,21 @@ async def get_user_subscriptions():
 
 @subscription.post("/user/subscription/")
 async def create_user_subscriptions(subscription: SubscriptionIn):
+    """
+    Endpoint for creating user subscriptions.
+
+    This endpoint allows users to create subscriptions for a given user based on the provided subscription data.
+
+    Args:
+        subscription (SubscriptionIn): The subscription data provided by the user.
+
+    Returns:
+        dict: A response dictionary containing the status, message, and subscription data if successful.
+
+    Raises:
+        HTTPException: If any errors occur during the subscription creation process, HTTP exceptions are raised
+        with the appropriate status code and error details.
+    """
     subscription_instance = SubscriptionModel()
 
     try:
