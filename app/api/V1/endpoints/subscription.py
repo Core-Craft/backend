@@ -3,8 +3,8 @@ from typing import List
 from fastapi import APIRouter, HTTPException
 
 from app.models.subscription import Subscription as SubscriptionModel
-from app.schemas.subscription import SubscriptionIn, SubUpdate
 from app.models.user import User as UserModel
+from app.schemas.subscription import SubscriptionIn, SubscriptionUpdate
 
 subscription = APIRouter()
 
@@ -71,55 +71,59 @@ async def get_user_subscriptions():
 
 @subscription.post("/user/subscription/")
 async def create_user_subscriptions(subscription: SubscriptionIn):
-    """
-    Create a new Subscription
+    subscription_instance = SubscriptionModel()
 
-    This endpoint create a new subscription. The response includes message of success/failure .
-
-    Args:
-        data (SubscriptionIn): The SubscriptionIn model containing subscription data to be created.
-
-    Raises:
-        HTTPException(404): If no user subscriptions are found.
-        HTTPException(500): If there is an internal server error while retrieving the data.
-    """
     try:
-        subscription_instance = SubscriptionModel()
         sub_dict = subscription.model_dump(exclude_unset=False)
-        if sub_dict["user_uuid"]:
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=f"Invalid subscription data: {e}")
+
+    if sub_dict["user_uuid"]:
+        try:
             user_instance = UserModel()
             user_data = user_instance.get(uuid=sub_dict["user_uuid"])
-            if user_data is None:
-                raise Exception("No user with this UUID")
+        except Exception as e:
+            raise HTTPException(
+                status_code=500, detail=f"Failed to retrieve user data: {e}"
+            )
 
-            user_subs = subscription_instance.filter(
-                filter={"user_uuid": sub_dict["user_uuid"]})
-            if len(user_subs) > 0:
-                raise HTTPException(status_code=400, detail="User with this \
-email already exists")
+        if user_data is None:
+            raise HTTPException(status_code=404, detail="User not found")
+        else:
+            user_subscription = subscription_instance.filter(
+                filter={"user_uuid": sub_dict["user_uuid"]}
+            )
+            if len(user_subscription) > 0:
+                raise HTTPException(
+                    status_code=400,
+                    detail="User with this user_uuid already has a subscription",
+                )
+            else:
+                try:
+                    response = subscription_instance.save(data=sub_dict)
+                except Exception as e:
+                    raise HTTPException(
+                        status_code=500,
+                        detail=f"Failed to register user subscription: {e}",
+                    )
+    else:
+        raise HTTPException(status_code=400, detail="user_uuid is mandatory")
 
-        subscription_data = subscription_instance.save(data=sub_dict)
-    except Exception as e:
-        raise HTTPException(
-            status_code=500,
-            detail=f"Failed to retrieve user subscriptions; Error:  {e}"
-        )
-
-    if subscription_data.acknowledged:
+    if response.acknowledged:
         return {
             "status": "success",
-            "message": "Subscription for user created successfully",
+            "message": "Subscription added successfully",
             "data": {
-                "id": sub_dict["user_uuid"],
+                "user_uuid": sub_dict["user_uuid"],
                 "amount": sub_dict["subscription"][0]["amount"],
             },
-         }
+        }
     else:
-        return {"status": "failure", "message": "Subscription Creation failed"}
+        return {"status": "failure", "message": "Failed to create the subscription"}
 
 
 @subscription.patch("/user/subscription/")
-async def update_user_subscriptions(subscription: SubUpdate):
+async def update_user_subscriptions(subscription: SubscriptionUpdate):
     """
     Update a Subscription
 
@@ -141,8 +145,9 @@ async def update_user_subscriptions(subscription: SubUpdate):
     try:
         response = subscription_instance.update(data=sub_dict)
     except Exception as e:
-        raise HTTPException(status_code=500,
-                            detail=f"Failed to update subscription: {e}")
+        raise HTTPException(
+            status_code=500, detail=f"Failed to update subscription: {e}"
+        )
 
     if response.acknowledged:
         return {"status": "success", "message": "Subscription update successful"}
