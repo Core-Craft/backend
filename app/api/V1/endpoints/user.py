@@ -238,6 +238,17 @@ async def update_user(data: UserUpdate):
         user_dict = data.model_dump(exclude_unset=True)
     except ValueError as e:
         raise HTTPException(status_code=400, detail=f"Invalid user data: {e}")
+    
+    try:
+        user_instance = UserModel()
+        user_data = user_instance.get(uuid=user_dict["user_uuid"])
+    except Exception as e:
+        raise HTTPException(
+            status_code=500, detail=f"Failed to retrieve user data: {e}"
+        )
+
+    if user_data is None:
+        raise HTTPException(status_code=404, detail="User not found")
 
     try:
         user_instance = UserModel()
