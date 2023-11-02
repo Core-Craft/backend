@@ -229,7 +229,7 @@ async def update_user(data: UserUpdate):
         user_dict = data.model_dump(exclude_unset=True)
     except ValueError as e:
         raise HTTPException(status_code=400, detail=f"Invalid user data: {e}")
-    
+
     try:
         user_instance = UserModel()
         user_data = user_instance.get(uuid=user_dict["user_uuid"])
