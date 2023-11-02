@@ -173,11 +173,11 @@ class UserUpdate(BaseModel):
     Represents a user update model for modifying user data.
 
     This class includes two fields:
-    - filter: An instance of the UserSearch class that specifies the filter criteria for identifying the user to be updated.
+    - user_uuid (int): The unique identifier for the user whose subscription is being updated.
     - user_data: An instance of the BaseUser class containing updated user data.
 
     Attributes:
-        filter (UserSearch): An instance of the UserSearch class to specify filter criteria.
+        user_uuid (int): The unique identifier for the user whose subscription is being updated.
         user_data (BaseUser): An instance of the BaseUser class containing updated user data.
 
     Note:
@@ -187,7 +187,7 @@ class UserUpdate(BaseModel):
         - Config.from_attributes (bool): Determines whether attribute values should be populated from class attributes when creating an instance of the model. If True, class attributes with the same name as fields in the model will be used to initialize those fields. Defaults to True, enabling attribute initialization from class attributes.
     """
 
-    filter: UserSearch
+    user_uuid: int
     user_data: BaseUser
 
     class Config:
