@@ -253,6 +253,17 @@ async def update_user(data: UserUpdate):
         raise HTTPException(status_code=404, detail="User not found")
 
     try:
+        user_instance = UserModel()
+        user_data = user_instance.get(uuid=user_dict["user_uuid"])
+    except Exception as e:
+        raise HTTPException(
+            status_code=500, detail=f"Failed to retrieve user data: {e}"
+        )
+
+    if user_data is None:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    try:
         response = user_instance.update(data=user_dict)
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to update user: {e}")
