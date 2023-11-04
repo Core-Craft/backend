@@ -1,4 +1,15 @@
+import os
+from datetime import datetime, timedelta
+from typing import Any, Union
+
+from jose import jwt
 from passlib.context import CryptContext
+
+ACCESS_TOKEN_EXPIRE_MINUTES = 30  # 30 minutes
+REFRESH_TOKEN_EXPIRE_MINUTES = 60 * 24 * 7  # 7 days
+ALGORITHM = "HS256"
+JWT_SECRET_KEY = os.environ["JWT_SECRET_KEY"]  # should be kept secret
+JWT_REFRESH_SECRET_KEY = os.environ["JWT_REFRESH_SECRET_KEY"]  # should be kept secret
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
@@ -45,3 +56,61 @@ def verify_password(password: str, hashed_password: str):
 
     """
     return pwd_context.verify(password, hashed_password)
+
+
+def create_access_token(subject: Union[str, Any], expires_delta: int = None) -> str:
+    """
+    Create an access token for the specified subject.
+
+    This function generates a JSON Web Token (JWT) access token for the given subject, typically representing a user or client. The token is signed with the secret key and includes an expiration time.
+
+    Args:
+        subject (Union[str, Any]): The subject for which the access token is created. This can be a user ID, username, or any relevant subject identifier.
+
+        expires_delta (int, optional): The expiration time of the token in seconds. If not provided, it defaults to the value defined by ACCESS_TOKEN_EXPIRE_MINUTES (in minutes).
+
+    Returns:
+        str: The generated JWT access token as a string.
+
+    Note:
+        The function uses the JWT_SECRET_KEY and ALGORITHM constants for signing the token and configuring the algorithm. The expiration time of the token can be specified directly or calculated based on the number of minutes defined by ACCESS_TOKEN_EXPIRE_MINUTES.
+    """
+    if expires_delta is not None:
+        expires_delta = datetime.utcnow() + expires_delta
+    else:
+        expires_delta = datetime.utcnow() + timedelta(
+            minutes=ACCESS_TOKEN_EXPIRE_MINUTES
+        )
+
+    to_encode = {"exp": expires_delta, "sub": str(subject)}
+    encoded_jwt = jwt.encode(to_encode, JWT_SECRET_KEY, ALGORITHM)
+    return encoded_jwt
+
+
+def create_refresh_token(subject: Union[str, Any], expires_delta: int = None) -> str:
+    """
+    Create a refresh token for the specified subject.
+
+    This function generates a JSON Web Token (JWT) refresh token for the given subject, typically representing a user or client. The token is signed with the refresh token secret key and includes an expiration time.
+
+    Args:
+        subject (Union[str, Any]): The subject for which the refresh token is created. This can be a user ID, username, or any relevant subject identifier.
+
+        expires_delta (int, optional): The expiration time of the token in seconds. If not provided, it defaults to the value defined by REFRESH_TOKEN_EXPIRE_MINUTES (in minutes).
+
+    Returns:
+        str: The generated JWT refresh token as a string.
+
+    Note:
+        The function uses the JWT_REFRESH_SECRET_KEY and ALGORITHM constants for signing the token and configuring the algorithm. The expiration time of the token can be specified directly or calculated based on the number of minutes defined by REFRESH_TOKEN_EXPIRE_MINUTES.
+    """
+    if expires_delta is not None:
+        expires_delta = datetime.utcnow() + expires_delta
+    else:
+        expires_delta = datetime.utcnow() + timedelta(
+            minutes=REFRESH_TOKEN_EXPIRE_MINUTES
+        )
+
+    to_encode = {"exp": expires_delta, "sub": str(subject)}
+    encoded_jwt = jwt.encode(to_encode, JWT_REFRESH_SECRET_KEY, ALGORITHM)
+    return encoded_jwt
