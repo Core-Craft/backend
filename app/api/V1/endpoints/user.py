@@ -177,7 +177,7 @@ async def login_user(user_data: OAuth2PasswordRequestForm = Depends()):
         dict: A dictionary containing the status of the login operation and a message.
             - "status" (str): "success" indicating a successful login or "failure" if the login failed.
             - "message" (str): A message confirming the success or failure of the login operation.
-            - "data" (dict, optional): A dictionary containing user information, including ID and access and refresh tokens, if the login is successful.
+            - "data" (dict, optional): A dictionary containing user information, including access and refresh tokens, if the login is successful.
 
     Raises:
         HTTPException 400: If the provided user data is invalid.
@@ -202,9 +202,8 @@ async def login_user(user_data: OAuth2PasswordRequestForm = Depends()):
                 "status": "success",
                 "message": "User login successful",
                 "data": {
-                    "id": user_response[0]["user_uuid"],
-                    "access_token": create_access_token(user_response),
-                    "refresh_token": create_refresh_token(user_response),
+                    "access_token": create_access_token(user_response[0]["user_uuid"]),
+                    "refresh_token": create_refresh_token(user_response[0]["user_uuid"])
                 },
             }
         else:
