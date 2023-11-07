@@ -1,10 +1,22 @@
-from typing import List
+from datetime import datetime
+from typing import Any, List, Union
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
+from jose import jwt
+from pydantic import ValidationError
 
 from app.models.user import User as UserModel
-from app.schemas.user import UserIn, UserOut, UserSearch, UserUpdate, UserLogin
-from .utils import hash_password, verify_password
+from app.schemas.user import TokenPayload, UserIn, UserOut, UserSearch, UserUpdate
+
+from .utils import (
+    ALGORITHM,
+    JWT_SECRET_KEY,
+    create_access_token,
+    create_refresh_token,
+    hash_password,
+    verify_password,
+)
 
 user = APIRouter()
 
@@ -152,50 +164,46 @@ async def register_user(user_data: UserIn):
 
 
 @user.post("/user/login")
-async def login_user(user_data: UserLogin):
+async def login_user(user_data: OAuth2PasswordRequestForm = Depends()):
     """
     Log in an existing user.
 
-    This endpoint allows an existing user to log in based on the provided user data in the UserLogin model.
+    This endpoint allows an existing user to log in based on the provided user data in the OAuth2PasswordRequestForm.
 
     Args:
-        user_data (UserLogin): The UserLogin model containing user login data, including email and password.
+        user_data (OAuth2PasswordRequestForm): The OAuth2PasswordRequestForm containing user login data, including email and password.
 
     Returns:
         dict: A dictionary containing the status of the login operation and a message.
             - "status" (str): "success" indicating a successful login or "failure" if the login failed.
             - "message" (str): A message confirming the success or failure of the login operation.
-            - "data" (dict, optional): A dictionary containing user information, including ID, full name, and phone number, if the login is successful.
+            - "data" (dict, optional): A dictionary containing user information, including access and refresh tokens, if the login is successful.
 
     Raises:
         HTTPException 400: If the provided user data is invalid.
         HTTPException 500: If there is an issue with retrieving existing user data.
-        HTTPException 404: If no user with the provided user_uuid exists.
+        HTTPException 404: If no user with the provided username exists.
         HTTPException 401: If the provided password is incorrect.
     """
     user_instance = UserModel()
 
     try:
-        user_dict = user_data.model_dump(exclude_unset=True)
-    except ValueError as e:
-        raise HTTPException(status_code=400, detail=f"Invalid request data: {e}")
-
-    try:
-        user_data = user_instance.filter(filter={"user_uuid": user_dict["user_uuid"]})
+        user_response = user_instance.filter(
+            filter={"user_uuid": int(user_data.username)}
+        )
     except Exception as e:
         raise HTTPException(
             status_code=500, detail=f"Failed to retrieve existing user data: {e}"
         )
 
-    if user_data:
-        if verify_password(user_dict["password"], user_data[0]["password"]):
+    if user_response:
+        if verify_password(user_data.password, user_response[0]["password"]):
             return {
                 "status": "success",
                 "message": "User login successful",
                 "data": {
-                    "id": user_data[0]["user_uuid"],
-                    "full_name": user_data[0]["full_name"],
-                    "phone_no": user_data[0]["phone_no"],
+                    "access_token": create_access_token(user_response[0]["user_uuid"]),
+                    "refresh_token": create_refresh_token(user_response[0]["user_uuid"])
                 },
             }
         else:
@@ -219,6 +227,9 @@ async def update_user(data: UserUpdate):
             - "status": Either "success" or "failure" indicating the result of the update.
             - "message": A message describing the result of the update operation.
 
+    Raises:
+        HTTPException: If any errors occur during the user update process, HTTP exceptions are raised with the appropriate status code and error details.
+
     """
     user_instance = UserModel()
 
@@ -226,6 +237,17 @@ async def update_user(data: UserUpdate):
         user_dict = data.model_dump(exclude_unset=True)
     except ValueError as e:
         raise HTTPException(status_code=400, detail=f"Invalid user data: {e}")
+
+    try:
+        user_instance = UserModel()
+        user_data = user_instance.get(uuid=user_dict["user_uuid"])
+    except Exception as e:
+        raise HTTPException(
+            status_code=500, detail=f"Failed to retrieve user data: {e}"
+        )
+
+    if user_data is None:
+        raise HTTPException(status_code=404, detail="User not found")
 
     try:
         response = user_instance.update(data=user_dict)
