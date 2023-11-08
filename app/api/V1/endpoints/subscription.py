@@ -72,7 +72,7 @@ async def get_user_subscriptions(token: str = Depends(get_current_user)):
 
 
 @subscription.post("/user/subscription/")
-async def create_user_subscriptions(subscription: SubscriptionIn):
+async def create_user_subscriptions(subscription: SubscriptionIn, token: str = Depends(get_current_user)):
     """
     Endpoint for creating user subscriptions.
 
