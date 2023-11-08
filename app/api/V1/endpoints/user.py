@@ -254,7 +254,7 @@ async def update_user(data: UserUpdate, token: str = Depends(get_current_user)):
 
 
 @user.delete("/user/delete/{user_uuid}")
-async def delete_user(user_uuid: int):
+async def delete_user(user_uuid: int, token: str = Depends(get_current_user)):
     """
     Delete a user.
 
