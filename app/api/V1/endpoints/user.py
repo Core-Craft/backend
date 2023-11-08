@@ -1,17 +1,13 @@
-from datetime import datetime
-from typing import Any, List, Union
+from typing import List
 
-from fastapi import APIRouter, Depends, HTTPException, status
-from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
-from jose import jwt
-from pydantic import ValidationError
+from fastapi import APIRouter, Depends, HTTPException
+from fastapi.security import OAuth2PasswordRequestForm
 
 from app.models.user import User as UserModel
-from app.schemas.user import TokenPayload, UserIn, UserOut, UserSearch, UserUpdate
+from app.schemas.user import UserIn, UserOut, UserSearch, UserUpdate
+from .utils import get_current_user
 
 from .utils import (
-    ALGORITHM,
-    JWT_SECRET_KEY,
     create_access_token,
     create_refresh_token,
     hash_password,
@@ -24,7 +20,7 @@ user = APIRouter()
 @user.get(
     "/user/{user_uuid}", response_model=UserIn, response_model_exclude={"password"}
 )
-async def get_user(user_uuid: int):
+async def get_user(user_uuid: int, token: str = Depends(get_current_user)):
     """
     Get user data by user UUID.
 
@@ -199,12 +195,9 @@ async def login_user(user_data: OAuth2PasswordRequestForm = Depends()):
     if user_response:
         if verify_password(user_data.password, user_response[0]["password"]):
             return {
-                "status": "success",
-                "message": "User login successful",
-                "data": {
-                    "access_token": create_access_token(user_response[0]["user_uuid"]),
-                    "refresh_token": create_refresh_token(user_response[0]["user_uuid"])
-                },
+                "access_token": create_access_token(user_response[0]["user_uuid"]),
+                "refresh_token": create_refresh_token(user_response[0]["user_uuid"]),
+                "token_type": "bearer",
             }
         else:
             raise HTTPException(status_code=401, detail="Invalid credentials")
