@@ -172,10 +172,6 @@ class UserUpdate(BaseModel):
     """
     Represents a user update model for modifying user data.
 
-    This class includes two fields:
-    - user_uuid (int): The unique identifier for the user whose subscription is being updated.
-    - user_data: An instance of the BaseUser class containing updated user data.
-
     Attributes:
         user_uuid (int): The unique identifier for the user whose subscription is being updated.
         user_data (BaseUser): An instance of the BaseUser class containing updated user data.
@@ -204,10 +200,6 @@ class UserUpdate(BaseModel):
 class UserLogin(BaseModel):
     """
     Represents a user login model for authenticating user access.
-
-    This class includes two fields:
-    - user_uuid (int): The unique identifier for the user.
-    - password (str): The user's password for authentication.
 
     Attributes:
         user_uuid (int): The unique identifier for the user.
