@@ -48,7 +48,7 @@ async def get_user(user_uuid: int, token: str = Depends(get_current_user)):
 
 
 @user.get("/users/", response_model=list[UserOut])
-async def get_users():
+async def get_users(token: str = Depends(get_current_user)):
     """
     Retrieve a list of users.
 
