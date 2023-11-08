@@ -136,7 +136,7 @@ async def create_user_subscriptions(subscription: SubscriptionIn, token: str = D
 
 
 @subscription.patch("/user/subscription/")
-async def update_user_subscriptions(subscription: SubscriptionUpdate):
+async def update_user_subscriptions(subscription: SubscriptionUpdate, token: str = Depends(get_current_user)):
     """
     Update a user's subscription.
 
