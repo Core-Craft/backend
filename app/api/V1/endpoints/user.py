@@ -1,10 +1,18 @@
 from typing import List
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, Depends, HTTPException
+from fastapi.security import OAuth2PasswordRequestForm
 
 from app.models.user import User as UserModel
-from app.schemas.user import UserIn, UserOut, UserSearch, UserUpdate, UserLogin
-from .utils import hash_password, verify_password
+from app.schemas.user import UserIn, UserOut, UserSearch, UserUpdate
+from .utils import get_current_user
+
+from .utils import (
+    create_access_token,
+    create_refresh_token,
+    hash_password,
+    verify_password,
+)
 
 user = APIRouter()
 
@@ -12,7 +20,7 @@ user = APIRouter()
 @user.get(
     "/user/{user_uuid}", response_model=UserIn, response_model_exclude={"password"}
 )
-async def get_user(user_uuid: int):
+async def get_user(user_uuid: int, token: str = Depends(get_current_user)):
     """
     Get user data by user UUID.
 
@@ -40,7 +48,7 @@ async def get_user(user_uuid: int):
 
 
 @user.get("/users/", response_model=list[UserOut])
-async def get_users():
+async def get_users(token: str = Depends(get_current_user)):
     """
     Retrieve a list of users.
 
@@ -68,7 +76,7 @@ async def get_users():
 
 
 @user.post("/users/filter/", response_model=List[UserOut])
-async def filter_users(filter: UserSearch):
+async def filter_users(filter: UserSearch, token: str = Depends(get_current_user)):
     """
     Filter users based on the provided filter criteria.
 
@@ -152,51 +160,44 @@ async def register_user(user_data: UserIn):
 
 
 @user.post("/user/login")
-async def login_user(user_data: UserLogin):
+async def login_user(user_data: OAuth2PasswordRequestForm = Depends()):
     """
     Log in an existing user.
 
-    This endpoint allows an existing user to log in based on the provided user data in the UserLogin model.
+    This endpoint allows an existing user to log in based on the provided user data in the OAuth2PasswordRequestForm.
 
     Args:
-        user_data (UserLogin): The UserLogin model containing user login data, including email and password.
+        user_data (OAuth2PasswordRequestForm): The OAuth2PasswordRequestForm containing user login data, including email and password.
 
     Returns:
         dict: A dictionary containing the status of the login operation and a message.
             - "status" (str): "success" indicating a successful login or "failure" if the login failed.
             - "message" (str): A message confirming the success or failure of the login operation.
-            - "data" (dict, optional): A dictionary containing user information, including ID, full name, and phone number, if the login is successful.
+            - "data" (dict, optional): A dictionary containing user information, including access and refresh tokens, if the login is successful.
 
     Raises:
         HTTPException 400: If the provided user data is invalid.
         HTTPException 500: If there is an issue with retrieving existing user data.
-        HTTPException 404: If no user with the provided user_uuid exists.
+        HTTPException 404: If no user with the provided username exists.
         HTTPException 401: If the provided password is incorrect.
     """
     user_instance = UserModel()
 
     try:
-        user_dict = user_data.model_dump(exclude_unset=True)
-    except ValueError as e:
-        raise HTTPException(status_code=400, detail=f"Invalid request data: {e}")
-
-    try:
-        user_data = user_instance.filter(filter={"user_uuid": user_dict["user_uuid"]})
+        user_response = user_instance.filter(
+            filter={"user_uuid": int(user_data.username)}
+        )
     except Exception as e:
         raise HTTPException(
             status_code=500, detail=f"Failed to retrieve existing user data: {e}"
         )
 
-    if user_data:
-        if verify_password(user_dict["password"], user_data[0]["password"]):
+    if user_response:
+        if verify_password(user_data.password, user_response[0]["password"]):
             return {
-                "status": "success",
-                "message": "User login successful",
-                "data": {
-                    "id": user_data[0]["user_uuid"],
-                    "full_name": user_data[0]["full_name"],
-                    "phone_no": user_data[0]["phone_no"],
-                },
+                "access_token": create_access_token(user_response[0]["user_uuid"]),
+                "refresh_token": create_refresh_token(user_response[0]["user_uuid"]),
+                "token_type": "bearer",
             }
         else:
             raise HTTPException(status_code=401, detail="Invalid credentials")
@@ -205,7 +206,7 @@ async def login_user(user_data: UserLogin):
 
 
 @user.patch("/user/update/")
-async def update_user(data: UserUpdate):
+async def update_user(data: UserUpdate, token: str = Depends(get_current_user)):
     """
     Update user information.
 
@@ -219,6 +220,9 @@ async def update_user(data: UserUpdate):
             - "status": Either "success" or "failure" indicating the result of the update.
             - "message": A message describing the result of the update operation.
 
+    Raises:
+        HTTPException: If any errors occur during the user update process, HTTP exceptions are raised with the appropriate status code and error details.
+
     """
     user_instance = UserModel()
 
@@ -226,6 +230,17 @@ async def update_user(data: UserUpdate):
         user_dict = data.model_dump(exclude_unset=True)
     except ValueError as e:
         raise HTTPException(status_code=400, detail=f"Invalid user data: {e}")
+
+    try:
+        user_instance = UserModel()
+        user_data = user_instance.get(uuid=user_dict["user_uuid"])
+    except Exception as e:
+        raise HTTPException(
+            status_code=500, detail=f"Failed to retrieve user data: {e}"
+        )
+
+    if user_data is None:
+        raise HTTPException(status_code=404, detail="User not found")
 
     try:
         response = user_instance.update(data=user_dict)
@@ -239,7 +254,7 @@ async def update_user(data: UserUpdate):
 
 
 @user.delete("/user/delete/{user_uuid}")
-async def delete_user(user_uuid: int):
+async def delete_user(user_uuid: int, token: str = Depends(get_current_user)):
     """
     Delete a user.
 

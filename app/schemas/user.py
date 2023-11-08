@@ -172,12 +172,8 @@ class UserUpdate(BaseModel):
     """
     Represents a user update model for modifying user data.
 
-    This class includes two fields:
-    - filter: An instance of the UserSearch class that specifies the filter criteria for identifying the user to be updated.
-    - user_data: An instance of the BaseUser class containing updated user data.
-
     Attributes:
-        filter (UserSearch): An instance of the UserSearch class to specify filter criteria.
+        user_uuid (int): The unique identifier for the user whose subscription is being updated.
         user_data (BaseUser): An instance of the BaseUser class containing updated user data.
 
     Note:
@@ -187,7 +183,7 @@ class UserUpdate(BaseModel):
         - Config.from_attributes (bool): Determines whether attribute values should be populated from class attributes when creating an instance of the model. If True, class attributes with the same name as fields in the model will be used to initialize those fields. Defaults to True, enabling attribute initialization from class attributes.
     """
 
-    filter: UserSearch
+    user_uuid: int
     user_data: BaseUser
 
     class Config:
@@ -204,10 +200,6 @@ class UserUpdate(BaseModel):
 class UserLogin(BaseModel):
     """
     Represents a user login model for authenticating user access.
-
-    This class includes two fields:
-    - user_uuid (int): The unique identifier for the user.
-    - password (str): The user's password for authentication.
 
     Attributes:
         user_uuid (int): The unique identifier for the user.
@@ -232,3 +224,21 @@ class UserLogin(BaseModel):
         """
 
         from_attributes = True
+
+
+class TokenPayload(BaseModel):
+    """
+    Represents a token payload model for JSON Web Tokens (JWT).
+
+    This class defines the structure of the payload contained within a JWT. It includes two fields:
+
+    Attributes:
+        - exp (int): The expiration timestamp (in seconds) indicating when the token will expire.
+        - sub (str): The subject field specifying the token's subject, typically representing a user or entity.
+
+    Note:
+        The payload is an essential part of a JWT and carries information about the token's validity and subject.
+    """
+
+    exp: int
+    sub: str
