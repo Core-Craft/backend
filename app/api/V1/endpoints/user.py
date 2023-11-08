@@ -76,7 +76,7 @@ async def get_users(token: str = Depends(get_current_user)):
 
 
 @user.post("/users/filter/", response_model=List[UserOut])
-async def filter_users(filter: UserSearch):
+async def filter_users(filter: UserSearch, token: str = Depends(get_current_user)):
     """
     Filter users based on the provided filter criteria.
 
