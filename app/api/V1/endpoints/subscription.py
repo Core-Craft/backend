@@ -1,16 +1,18 @@
 from typing import List
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, Depends, HTTPException
 
 from app.models.subscription import Subscription as SubscriptionModel
 from app.models.user import User as UserModel
 from app.schemas.subscription import SubscriptionIn, SubscriptionUpdate
 
+from .utils import get_current_user
+
 subscription = APIRouter()
 
 
 @subscription.get("/user/subscription/{user_uuid}", response_model=SubscriptionIn)
-async def get_user_subscription(user_uuid: int):
+async def get_user_subscription(user_uuid: int, token: str = Depends(get_current_user)):
     """
     Get user subscription data by user UUID.
 
