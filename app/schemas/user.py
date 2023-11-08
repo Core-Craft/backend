@@ -232,3 +232,21 @@ class UserLogin(BaseModel):
         """
 
         from_attributes = True
+
+
+class TokenPayload(BaseModel):
+    """
+    Represents a token payload model for JSON Web Tokens (JWT).
+
+    This class defines the structure of the payload contained within a JWT. It includes two fields:
+
+    Attributes:
+        - exp (int): The expiration timestamp (in seconds) indicating when the token will expire.
+        - sub (str): The subject field specifying the token's subject, typically representing a user or entity.
+
+    Note:
+        The payload is an essential part of a JWT and carries information about the token's validity and subject.
+    """
+
+    exp: int
+    sub: str
