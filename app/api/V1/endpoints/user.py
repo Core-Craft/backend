@@ -206,7 +206,7 @@ async def login_user(user_data: OAuth2PasswordRequestForm = Depends()):
 
 
 @user.patch("/user/update/")
-async def update_user(data: UserUpdate):
+async def update_user(data: UserUpdate, token: str = Depends(get_current_user)):
     """
     Update user information.
 
