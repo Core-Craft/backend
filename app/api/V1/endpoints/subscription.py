@@ -1,16 +1,18 @@
 from typing import List
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, Depends, HTTPException
 
 from app.models.subscription import Subscription as SubscriptionModel
 from app.models.user import User as UserModel
 from app.schemas.subscription import SubscriptionIn, SubscriptionUpdate
 
+from .utils import get_current_user
+
 subscription = APIRouter()
 
 
 @subscription.get("/user/subscription/{user_uuid}", response_model=SubscriptionIn)
-async def get_user_subscription(user_uuid: int):
+async def get_user_subscription(user_uuid: int, token: str = Depends(get_current_user)):
     """
     Get user subscription data by user UUID.
 
@@ -42,7 +44,7 @@ async def get_user_subscription(user_uuid: int):
 
 
 @subscription.get("/user/subscriptions/", response_model=List[SubscriptionIn])
-async def get_user_subscriptions():
+async def get_user_subscriptions(token: str = Depends(get_current_user)):
     """
     Get a list of user subscriptions.
 
@@ -70,7 +72,7 @@ async def get_user_subscriptions():
 
 
 @subscription.post("/user/subscription/")
-async def create_user_subscriptions(subscription: SubscriptionIn):
+async def create_user_subscriptions(subscription: SubscriptionIn, token: str = Depends(get_current_user)):
     """
     Endpoint for creating user subscriptions.
 
@@ -134,7 +136,7 @@ async def create_user_subscriptions(subscription: SubscriptionIn):
 
 
 @subscription.patch("/user/subscription/")
-async def update_user_subscriptions(subscription: SubscriptionUpdate):
+async def update_user_subscriptions(subscription: SubscriptionUpdate, token: str = Depends(get_current_user)):
     """
     Update a user's subscription.
 
