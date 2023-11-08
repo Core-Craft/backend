@@ -172,10 +172,6 @@ class UserUpdate(BaseModel):
     """
     Represents a user update model for modifying user data.
 
-    This class includes two fields:
-    - user_uuid (int): The unique identifier for the user whose subscription is being updated.
-    - user_data: An instance of the BaseUser class containing updated user data.
-
     Attributes:
         user_uuid (int): The unique identifier for the user whose subscription is being updated.
         user_data (BaseUser): An instance of the BaseUser class containing updated user data.
@@ -205,10 +201,6 @@ class UserLogin(BaseModel):
     """
     Represents a user login model for authenticating user access.
 
-    This class includes two fields:
-    - user_uuid (int): The unique identifier for the user.
-    - password (str): The user's password for authentication.
-
     Attributes:
         user_uuid (int): The unique identifier for the user.
         password (str): The user's password for authentication.
@@ -232,3 +224,21 @@ class UserLogin(BaseModel):
         """
 
         from_attributes = True
+
+
+class TokenPayload(BaseModel):
+    """
+    Represents a token payload model for JSON Web Tokens (JWT).
+
+    This class defines the structure of the payload contained within a JWT. It includes two fields:
+
+    Attributes:
+        - exp (int): The expiration timestamp (in seconds) indicating when the token will expire.
+        - sub (str): The subject field specifying the token's subject, typically representing a user or entity.
+
+    Note:
+        The payload is an essential part of a JWT and carries information about the token's validity and subject.
+    """
+
+    exp: int
+    sub: str
