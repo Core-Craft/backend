@@ -44,7 +44,7 @@ async def get_user_subscription(user_uuid: int, token: str = Depends(get_current
 
 
 @subscription.get("/user/subscriptions/", response_model=List[SubscriptionIn])
-async def get_user_subscriptions():
+async def get_user_subscriptions(token: str = Depends(get_current_user)):
     """
     Get a list of user subscriptions.
 
